@@ -9,6 +9,7 @@ import HomePage from './components/pages/HomePage';
 import Dashboard from './components/pages/Dashboard';
 import HistoryPage from './components/pages/HistoryPage';
 import { logoutUser } from './services/authService';
+import { About } from './components/pages/About';
 
 function App() {
   // Estados de autenticación y navegación
@@ -69,6 +70,8 @@ function App() {
       {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} />}
       {currentPage === 'dashboard' && <Dashboard />}
       {currentPage === 'history' && <HistoryPage />}
+      {currentPage === 'about' && <About />}
+
     </div>
   );
 }

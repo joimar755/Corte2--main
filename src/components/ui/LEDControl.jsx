@@ -1,50 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { Lightbulb } from "lucide-react";
 
-// 🔐 Función para obtener el token JWT desde localStorage
+const socket = io("http://192.168.1.6:3000"); // ⚡ Ajusta la IP del servidor
+
 const getToken = () => localStorage.getItem("authToken");
 
 const LEDControl = () => {
-  const [leds, setLeds] = useState({
-    led1: false,
-    led2: false,
-    led3: false,
-  });
+  const [leds, setLeds] = useState({ led1: false, led2: false, led3: false });
+
+  useEffect(() => {
+    socket.on("control", (data) => {
+      console.log("📡 Estado recibido:", data);
+      setLeds(data);
+    });
+
+    return () => socket.off("control");
+  }, []);
 
   const handleToggle = async (ledId) => {
-    const newState = {
-      ...leds,
-      [`led${ledId}`]: !leds[`led${ledId}`],
-    };
+    const newState = { ...leds, [`led${ledId}`]: !leds[`led${ledId}`] };
     setLeds(newState);
 
-    // 🔐 Obtener token con la función centralizada
     const token = getToken();
-    
     try {
-      const response = await fetch("http://192.168.1.6:3000/leds", {
+      await fetch("http://192.168.1.6:3000/leds", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, // ✅ Autenticación
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newState),
       });
-
-      // Analizar la respuesta
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          console.warn("⛔ Token inválido o expirado.");
-          alert("Tu sesión expiró, inicia sesión nuevamente.");
-        }
-        throw new Error(result.error || "Error en la solicitud");
-      }
-
-      console.log("💡 Estado actualizado en servidor:", result);
-    } catch (error) {
-      console.error("❌ Error al enviar datos al backend:", error);
+    } catch (err) {
+      console.error("❌ Error enviando datos:", err);
     }
   };
 
@@ -65,7 +54,6 @@ const LEDControl = () => {
         {ledConfig.map((led) => {
           const isOn = leds[`led${led.id}`];
           const colorClass = isOn ? `bg-${led.color}-500` : "bg-gray-300";
-          const shadowClass = isOn ? `shadow-lg shadow-${led.color}-500/50` : "";
 
           return (
             <div
@@ -73,9 +61,7 @@ const LEDControl = () => {
               className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
             >
               <div className="flex items-center space-x-3">
-                <div
-                  className={`w-6 h-6 rounded-full transition-all ${colorClass} ${shadowClass}`}
-                ></div>
+                <div className={`w-6 h-6 rounded-full ${colorClass}`}></div>
                 <span className="font-semibold text-gray-700">{led.name}</span>
               </div>
               <button

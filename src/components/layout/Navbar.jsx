@@ -53,6 +53,17 @@ const Navbar = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
               <History size={20} />
               <span>Historial</span>
             </button>
+            <button
+              onClick={() => setCurrentPage('about')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition font-medium ${
+                currentPage === 'about' 
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Activity size={20} />
+              <span>about</span>
+            </button>
 
             {/* Usuario y Logout */}
             <div className="flex items-center space-x-3 border-l-2 border-gray-200 pl-4 ml-2">
